@@ -1,0 +1,54 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/ingress-status: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/startup-cpu-boost: "${STARTUP_CPU_BOOST}"
+        autoscaling.knative.dev/maxScale: "${MAX_SCALE}"
+    spec:
+      serviceAccountName: "${SERVICE_ACCOUNT_RUN}"
+      containerConcurrency: "${CONTAINER_CONCURRENCY}"
+      containers:
+      - image: ${IMAGE}
+        ports:
+        - containerPort: ${CONTAINER_PORT}
+        env:
+          - name: SPRING_FLYWAY_ENABLED
+            value: "true"
+          - name: LOGGING_LEVEL_ROOT
+            value: "${LOG_LEVEL}"
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              secretKeyRef:
+                key: latest
+                name: ${SPRING_DATASOURCE_URL_ENV_NAME}
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: latest
+                name: ${SPRING_DATASOURCE_USERNAME_ENV_NAME}
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: latest
+                name: ${SPRING_DATASOURCE_PASSWORD_ENV_NAME}
+        resources:
+          limits:
+            cpu: "${RESOURCE_LIMIT_CPU}"
+            memory: "${RESOURCE_LIMIT_MEMORY}"
+        startupProbe:
+          timeoutSeconds: 240
+          periodSeconds: 240
+          failureThreshold: 5
+          tcpSocket:
+            port: ${CONTAINER_PORT}
+  traffic:
+  - percent: 100
+    latestRevision: true

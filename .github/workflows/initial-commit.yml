@@ -1,0 +1,86 @@
+name: Initial Commit Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  create:
+    branches:
+      - main
+      - dev
+
+jobs:
+  initial_commit_process:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Verificar se o commit é "Initial commit" ou "Initialize dev"
+        id: check_commit
+        run: |
+          echo "Commit message: ${{ github.event.head_commit.message }}"
+          if [[ "${{ github.event.head_commit.message }}" != "Initial commit" && "${{ github.event.head_commit.message }}" != "Initialize dev" ]]; then
+            echo "Commit não é 'Initial commit' nem 'Initialize dev'. Abortando."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Set repository name
+        env:
+          FULL_REPO_NAME: ${{ github.repository }}
+        run: |
+          REPO_NAME=$(echo $FULL_REPO_NAME | cut -d'/' -f2)
+          echo "SERVICE_NAME=$REPO_NAME" >> $GITHUB_ENV
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Substituir {{alterar-nome-projeto}} no Dockerfile
+        run: |
+          # Substitui {{alterar-nome-projeto}} pelo valor da variável SERVICE_NAME no Dockerfile
+          sed -i "s|{{alterar-nome-projeto}}|$SERVICE_NAME|g" Dockerfile
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Substituir {{alterar-nome-projeto}} no nginx.conf
+        run: |
+          # Substitui {{alterar-nome-projeto}} pelo valor da variável SERVICE_NAME no nginx.conf
+          sed -i "s|{{alterar-nome-projeto}}|$SERVICE_NAME|g" nginx.conf
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Verificar substituição no Dockerfile
+        run: |
+          # Mostrar as primeiras linhas do Dockerfile para garantir que a substituição foi feita corretamente
+          head -n 10 Dockerfile
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Verificar substituição no nginx.conf
+        run: |
+          # Mostrar as primeiras linhas do nginx.conf para garantir que a substituição foi feita corretamente
+          head -n 10 nginx.conf
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Commit e push da modificação no Dockerfile e nginx.conf
+        run: |
+          # Configura o usuário para o commit
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Adiciona as mudanças feitas no Dockerfile e nginx.conf
+          git add Dockerfile nginx.conf
+          
+          # Realiza o commit com uma mensagem explicativa
+          git commit -m "Substituir {{alterar-nome-projeto}} por $SERVICE_NAME no Dockerfile e nginx.conf"
+          
+          # Envia as alterações para o repositório remoto
+          git push origin ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.check_commit.outcome == 'success'
+
+      - name: Excluir arquivo initial-commit.yml após execução bem-sucedida
+        run: |
+          git rm .github/workflows/initial-commit.yml
+          git commit -m "Remover arquivo initial-commit.yml"
+          git push origin ${{ github.ref }}
+        if: steps.check_commit.outcome == 'success'

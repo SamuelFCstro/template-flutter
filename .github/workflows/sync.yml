@@ -1,0 +1,21 @@
+#
+# This is a special workflow that must be triggered by the user and will
+# initiate a sync of the FlutterFlow project.
+#
+# It is expected that FLUTTERFLOW_PROJECT_TOKEN environment variable exists
+# and it is set to the token for exporting the repository using the command
+# line tool. Ideally the token is stored as a GitHub secret.
+#
+# See: https://github.com/FlutterFlow/flutterflow-cli
+#
+name: Sync
+on:
+  workflow_dispatch:
+
+jobs:
+  Sync:
+    uses: Piracanjuba-FlutterFlow/arquivos-de-workflow-flutter/.github/workflows/sync.yml@dev
+    secrets:
+      FLUTTERFLOW_PROJECT_ID:  ${{ secrets.FLUTTERFLOW_PROJECT_ID }}
+      FLUTTERFLOW_PROJECT_TOKEN: ${{ secrets.FLUTTERFLOW_PROJECT_TOKEN }}
+      FLUTTERFLOW_PROJECT_ENDPOINT: ${{ secrets.FLUTTERFLOW_PROJECT_ENDPOINT || 'https://api.flutterflow.io/v1' }}
