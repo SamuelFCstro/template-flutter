@@ -14,7 +14,7 @@ on:
 
 jobs:
   Sync:
-    uses: Piracanjuba-FlutterFlow/arquivos-de-workflow-flutter/.github/workflows/sync.yml@dev
+    uses: SamuelFCstro/arquivos-de-workflow-flutter/.github/workflows/sync.yml@dev
     secrets:
       FLUTTERFLOW_PROJECT_ID:  ${{ secrets.FLUTTERFLOW_PROJECT_ID }}
       FLUTTERFLOW_PROJECT_TOKEN: ${{ secrets.FLUTTERFLOW_PROJECT_TOKEN }}
