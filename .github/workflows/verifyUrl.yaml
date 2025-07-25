@@ -1,0 +1,15 @@
+name: Verificar URL no JSON
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  verifyUrl:
+    uses: Piracanjuba-FlutterFlow/arquivos-de-workflow-flutter/.github/workflows/verifyUrl.yaml@dev

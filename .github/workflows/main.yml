@@ -1,0 +1,20 @@
+#
+# This will run for commits that land on the
+# main branch of the project.
+#
+# name: DEV
+# on:
+#   pull_request:
+#     branches:
+#       - dev
+#     types:
+#       - closed
+#   workflow_dispatch:
+  
+# jobs:
+#   DEV:
+#     if: ${{ github.event.pull_request.merged == true }}
+#     uses: Piracanjuba-FlutterFlow/arquivos-de-workflow-flutter/.github/workflows/main.yml@dev
+#     secrets:
+#       SA_JSON_DEV:  ${{ secrets.SA_JSON_DEV }}
+      
